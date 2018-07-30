@@ -16,6 +16,9 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.support.ui.Select;
 
@@ -36,11 +39,9 @@ public class Base {
 	 */
 	public static final String SCREENSHOT_LOCATION_TEST = "C:/autotest_capture/test/";
 
-	// TODO: テストしたいdriverの選択
-	public WebDriver driver = new InternetExplorerDriver();
-	//public WebDriver driver = new FirefoxDriver();
-	//public WebDriver driver = new ChromeDriver();
-	//public WebDriver driver = new EdgeDriver();
+	public static WebDriver driver = null;
+
+	public static String envVariable = "";
 
 	/**
 	 * テストクラスの開始時に１度だけ実行される
@@ -48,7 +49,50 @@ public class Base {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		System.setProperty("webdriver.ie.driver", "./driver/IEDriverServer.exe");
+
+		// ブラウザの選択（テスト起動時の環境変数にて設定）
+		String browserType = System.getenv("BROWSER_TYPE");
+		if ("CHROME".equals(browserType)) {
+			System.setProperty("webdriver.chrome.driver", "./driver/chrome/chromedriver.exe");
+			driver = new ChromeDriver();
+
+		} else if ("IE".equals(browserType)) {
+			System.setProperty("webdriver.ie.driver", "./driver/ie/IEDriverServer.exe");
+			driver = new InternetExplorerDriver();
+
+		} else if ("FF32".equals(browserType)) {
+			System.setProperty("webdriver.gecko.driver", "./driver/ff32/geckodriver.exe");
+			driver = new FirefoxDriver();
+
+		} else if ("FF64".equals(browserType)) {
+			System.setProperty("webdriver.gecko.driver", "./driver/ff64/geckodriver.exe");
+			FirefoxOptions firefoxOptions = new FirefoxOptions();
+		    firefoxOptions.setCapability("marionette", true);
+		    driver = new FirefoxDriver(firefoxOptions);
+
+		} else if ("EDGE".equals(browserType)) {
+			System.setProperty("webdriver.edge.driver", "./driver/edge/MicrosoftWebDriver.exe");
+			driver = new FirefoxDriver();
+
+		} else {
+			throw new Exception();
+		}
+
+		// 環境依存情報の設定（テスト起動時の環境変数にて設定）
+		String envType = System.getenv("ENV_TYPE");
+		if ("PRODUCT".equals(envType)) {
+			envVariable = "0";
+
+		} else if ("DEVELOP".equals(envType)) {
+			envVariable = "1";
+
+		} else if ("TRAINING".equals(envType)) {
+			envVariable = "2";
+
+		} else {
+			throw new Exception();
+		}
+
 	}
 
 	/**
@@ -68,7 +112,7 @@ public class Base {
 	@After
 	public void tearDown() throws Exception {
 		// 閉じる
-		driver.quit();
+		//driver.quit();
 	}
 
 	/**
@@ -76,7 +120,9 @@ public class Base {
 	 * @throws Exception
 	 */
 	@AfterClass
-	public void tearDownAfterClass() throws Exception {
+	public static void tearDownAfterClass() throws Exception {
+		// 閉じる
+		//driver.quit();
 	}
 
 	/**

@@ -36,6 +36,14 @@ public class CaseName extends Base {
 		}
 	}
 
+	@Test
+	public void test000() {
+		System.out.println("hoge start");
+		driver.get("http://www.yahoo.co.jp");
+		System.out.println("hoge end");
+	}
+
+
 	/**
 	 * サンプルケース１（画面キャプチャ取得）
 	 */
