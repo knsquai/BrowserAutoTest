@@ -3,15 +3,22 @@ package template;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 
 import common.Base;
 import common.csv.CsvReader;
 import common.csv.bean.DataBean;
+import ru.yandex.qatools.ashot.AShot;
+import ru.yandex.qatools.ashot.Screenshot;
+import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 
 public class CaseName extends Base {
 
@@ -34,6 +41,35 @@ public class CaseName extends Base {
 			CsvReader csvReader = new CsvReader();
 			paramList = csvReader.opencsvToBean(paramFile);
 		}
+	}
+
+	/**
+	 * サンプルページの制御
+	 */
+	@Test
+	public void test999() {
+
+		driver.get("https://www.flierinc.com/summary/1583");
+		((JavascriptExecutor) driver).executeScript("document.getElementsByTagName('header')[0].remove();");
+		((JavascriptExecutor) driver).executeScript("document.getElementsByClassName('page-top')[0].remove();");
+		driver.manage().window().maximize();
+		pause(5000);
+		for (int i = 0; i < 5; i++) {
+		    ((JavascriptExecutor) driver).executeScript("javascript:window.scrollBy(0,1000)");
+		    pause(2000);
+		}
+		for (int i = 0; i < 5; i++) {
+		    ((JavascriptExecutor) driver).executeScript("javascript:window.scrollBy(0,-1000)");
+		    pause(2000);
+		}
+	    Screenshot screenshot = new AShot().shootingStrategy(ShootingStrategies.viewportPasting(100)).takeScreenshot(driver);
+	    try {
+			ImageIO.write(screenshot.getImage(), "JPG", new File("c:/tmp/hoge.jpg"));
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
