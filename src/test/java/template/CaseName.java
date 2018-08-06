@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.Select;
 
 import common.Base;
 import common.csv.CsvReader;
@@ -94,21 +95,31 @@ public class CaseName extends Base {
 
 		// ラジオボタン(男)
 		driver.findElement(By.xpath("/html/body/form[3]/input[1]")).click();
-		pause(3000);
+		pause(1000);
 		// ラジオボタン(女)
 		driver.findElement(By.xpath("/html/body/form[3]/input[2]")).click();
 		pause(3000);
 
 		// チェックボックス(アメリカ)
 		driver.findElement(By.xpath("/html/body/form[4]/input[1]")).click();
-		pause(3000);
+		pause(1000);
 		// チェックボックス(イタリア)
 		driver.findElement(By.xpath("/html/body/form[4]/input[2]")).click();
 		pause(3000);
 
-		// リストボックス
+		// リストボックス（肉じゃが・インデックス指定）
+		Select dropdown = new Select(driver.findElement(By.name("ryouri")));
+		dropdown.selectByIndex(1);
+		pause(1000);
+		// リストボックス（すき焼き・value指定）
+		dropdown.selectByValue("sukiyaki");
+		pause(1000);
+		// リストボックス（カレー・項目名指定）
+		dropdown.selectByVisibleText("カレーライス");
+		pause(3000);
 
 		// ボタン押下
+		driver.findElement(By.xpath("/html/body/form[6]/input")).click();
 
 	}
 
