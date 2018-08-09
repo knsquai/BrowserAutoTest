@@ -2,7 +2,7 @@ package common;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -10,17 +10,17 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 
 
@@ -29,19 +29,16 @@ import org.openqa.selenium.support.ui.Select;
  */
 public class Base {
 
-	/**
-	 * スクリーンショットの拡張子
-	 */
-	public static final String EXTENSION = ".jpg";
-
-	/**
-	 * スクリーンショット保存先フォルダ指定
-	 */
-	public static final String SCREENSHOT_LOCATION_TEST = "C:/autotest_capture/test/";
-
 	public static WebDriver driver = null;
 
-	public static String envVariable = "";
+	/**
+	 * テスト対象環境のパラメータ(以下は設定例)
+	 * 　・本番　　　　：PRODUCT
+	 * 　・トレーニング：TRAINING
+	 * 　・開発　　　　：DEVELOP
+	 * ※任意設定項目、各プロジェクトごとに柔軟に設定可
+	 */
+	public static String envType = "";
 
 	/**
 	 * テストクラスの開始時に１度だけ実行される
@@ -50,44 +47,70 @@ public class Base {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 
-		// ブラウザの選択（テスト起動時の環境変数にて設定）
+		/*
+		 * ★テスト起動時の環境変数の変数格納
+		 */
+		// 実行用端末情報（"STAND_ALONE" or "REMOTE"）
+		String replayEnv = System.getenv("REPLAY_ENV");
+		// 実行ブラウザ情報("CHROME" or "IE" or "FF32" or "FF64" or "EDGE")
 		String browserType = System.getenv("BROWSER_TYPE");
-		if ("CHROME".equals(browserType)) {
-			System.setProperty("webdriver.chrome.driver", "./driver/chrome/chromedriver.exe");
-			driver = new ChromeDriver();
+		// テスト対象環境（任意設定項目、子クラスにて参照可）
+		envType = System.getenv("ENV_TYPE");
 
-		} else if ("IE".equals(browserType)) {
-			System.setProperty("webdriver.ie.driver", "./driver/ie/IEDriverServer.exe");
-			driver = new InternetExplorerDriver();
+		/*
+		 * ★WebDriverのインスタンス化
+		 */
+		if ("STAND_ALONE".equals(replayEnv)) {
+			// 自端末での実行
+			if ("CHROME".equals(browserType)) {
+				System.setProperty("webdriver.chrome.driver", "./driver/chrome/chromedriver.exe");
+				driver = new ChromeDriver();
 
-		} else if ("FF32".equals(browserType)) {
-			System.setProperty("webdriver.gecko.driver", "./driver/ff32/geckodriver.exe");
-			driver = new FirefoxDriver();
+			} else if ("IE".equals(browserType)) {
+				System.setProperty("webdriver.ie.driver", "./driver/ie/IEDriverServer.exe");
+				driver = new InternetExplorerDriver();
 
-		} else if ("FF64".equals(browserType)) {
-			System.setProperty("webdriver.gecko.driver", "./driver/ff64/geckodriver.exe");
-			FirefoxOptions firefoxOptions = new FirefoxOptions();
-		    firefoxOptions.setCapability("marionette", true);
-		    driver = new FirefoxDriver(firefoxOptions);
+			} else if ("FF32".equals(browserType)) {
+				System.setProperty("webdriver.gecko.driver", "./driver/ff32/geckodriver.exe");
+				driver = new FirefoxDriver();
 
-		} else if ("EDGE".equals(browserType)) {
-			System.setProperty("webdriver.edge.driver", "./driver/edge/MicrosoftWebDriver.exe");
-			driver = new FirefoxDriver();
+			} else if ("FF64".equals(browserType)) {
+				System.setProperty("webdriver.gecko.driver", "./driver/ff64/geckodriver.exe");
+				FirefoxOptions firefoxOptions = new FirefoxOptions();
+			    firefoxOptions.setCapability("marionette", true);
+			    driver = new FirefoxDriver(firefoxOptions);
 
-		} else {
-			throw new Exception();
-		}
+			} else if ("EDGE".equals(browserType)) {
+				System.setProperty("webdriver.edge.driver", "./driver/edge/MicrosoftWebDriver.exe");
+				driver = new FirefoxDriver();
 
-		// 環境依存情報の設定（テスト起動時の環境変数にて設定）
-		String envType = System.getenv("ENV_TYPE");
-		if ("PRODUCT".equals(envType)) {
-			envVariable = "0";
+			} else {
+				throw new Exception();
+			}
+		} else if ("REMOTE".equals(replayEnv)) {
+			// テスト用リモート端末での実行
+	        DesiredCapabilities capabilities = new DesiredCapabilities();
+	        capabilities.setPlatform(Platform.WINDOWS);
 
-		} else if ("DEVELOP".equals(envType)) {
-			envVariable = "1";
+			if ("CHROME".equals(browserType)) {
+				capabilities.setBrowserName("chrome");
 
-		} else if ("TRAINING".equals(envType)) {
-			envVariable = "2";
+			} else if ("IE".equals(browserType)) {
+				capabilities.setBrowserName("internet explorer");
+
+			} else if ("FF32".equals(browserType)) {
+				capabilities.setBrowserName("firefox");
+
+			} else if ("FF64".equals(browserType)) {
+				capabilities.setBrowserName("firefox");
+
+			} else if ("EDGE".equals(browserType)) {
+				capabilities.setBrowserName("edge");
+
+			} else {
+				throw new Exception();
+			}
+			driver = new RemoteWebDriver(new URL("http://10.128.117.251:4444/wd/hub"), capabilities);
 
 		} else {
 			throw new Exception();
@@ -175,63 +198,6 @@ public class Base {
 			takeScreenshot(filePath);
 		}
 
-	}
-
-	/**
-	 * テキストフィールド（textbox, textarea）の入力処理
-	 *
-	 * @param driver
-	 * @param xpath
-	 * @param text
-	 */
-	public void textInput(WebDriver driver, String xpath, String text) {
-		WebElement element = driver.findElement(By.xpath(xpath));
-		element.sendKeys(text);
-	}
-
-	/**
-	 * プルダウンの選択処理
-	 *
-	 * @param driver
-	 * @param xpath
-	 * @param label
-	 */
-	public void select(WebDriver driver, String xpath, String label) {
-		Select element = new Select(driver.findElement(By.xpath(xpath)));
-		element.selectByVisibleText(label);
-	}
-
-	/**
-	 * クリック処理
-	 *
-	 * @param driver
-	 * @param xpath
-	 */
-	public void click(WebDriver driver, String xpath) {
-		driver.findElement(By.xpath(xpath)).click();
-	}
-
-	/**
-	 * クリア処理
-	 *
-	 * @param driver
-	 * @param xpath
-	 */
-	public void clear(WebDriver driver, String xpath) {
-		driver.findElement(By.xpath(xpath)).clear();
-	}
-
-	/**
-	 * スイッチウインドウ処理
-	 *
-	 * @param driver
-	 */
-	public void switchWindow(WebDriver driver) {
-		String currentWindowHandle = driver.getWindowHandle();
-		Set<String> windowHandles = driver.getWindowHandles();
-		windowHandles = driver.getWindowHandles();
-		windowHandles.remove(currentWindowHandle);
-		driver.switchTo().window(windowHandles.iterator().next());
 	}
 
 	/**
