@@ -6,7 +6,7 @@ import org.openqa.selenium.support.ui.Select;
 
 import common.Base;
 
-public class CaseName extends Base {
+public class SampleTestCase extends Base {
 
 	/**
 	 * BaseクラスにsetUpBeforeClass()、setUp()を定義しているため、
