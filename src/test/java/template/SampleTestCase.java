@@ -13,6 +13,23 @@ public class SampleTestCase extends Base {
 	 * extendsする場合は子クラスに定義しないこと。
 	 */
 
+	@Test
+	public void test001() {
+
+		driver.get("https://auctions.yahoo.co.jp/sell/f/imgup/");
+
+		// ID
+		driver.findElement(By.xpath("")).sendKeys("");
+
+		// PW
+		driver.findElement(By.xpath("")).sendKeys("");
+
+		// ボタン押下
+		driver.findElement(By.xpath("")).click();
+
+
+	}
+
 	/**
 	 * サンプルページの制御
 	 */

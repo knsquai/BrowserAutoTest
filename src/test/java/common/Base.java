@@ -54,6 +54,8 @@ public class Base {
 		String replayEnv = System.getenv("REPLAY_ENV");
 		// 実行ブラウザ情報("CHROME" or "IE" or "FF32" or "FF64" or "EDGE")
 		String browserType = System.getenv("BROWSER_TYPE");
+		// 実行用端末情報（"Win7" or "Win10"）
+		String osType = System.getenv("OS_TYPE");
 		// テスト対象環境（任意設定項目、子クラスにて参照可）
 		envType = System.getenv("ENV_TYPE");
 
@@ -92,12 +94,20 @@ public class Base {
 	        DesiredCapabilities capabilities = new DesiredCapabilities();
 	        capabilities.setPlatform(Platform.WINDOWS);
 
+
 			if ("CHROME".equals(browserType)) {
 				capabilities.setBrowserName("chrome");
 
 			} else if ("IE".equals(browserType)) {
 				capabilities.setBrowserName("internet explorer");
-
+		        if ("Win7".equals(osType)) {
+			        capabilities.setCapability("version", "11(Win7)");
+		        } else if ("Win10".equals(osType)) {
+			        capabilities.setCapability("version", "11(Win10)");
+				} else {
+					System.out.println("Parameter Error : OS");
+					throw new Exception();
+				}
 			} else if ("FF32".equals(browserType)) {
 				capabilities.setBrowserName("firefox");
 
@@ -108,11 +118,13 @@ public class Base {
 				capabilities.setBrowserName("edge");
 
 			} else {
+				System.out.println("Parameter Error : BROWSER");
 				throw new Exception();
 			}
 			driver = new RemoteWebDriver(new URL("http://10.128.117.251:4444/wd/hub"), capabilities);
 
 		} else {
+			System.out.println("Parameter Error : REPLAY_ENV");
 			throw new Exception();
 		}
 
